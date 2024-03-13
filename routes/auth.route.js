@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
         .cookie("token", token, {
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000,
-            sameSite: "lax",
+            sameSite: process.env.PROD_ENV === "Development" ? "lax" : "none",
             secure: process.env.PROD_ENV === "Development" ? false : true,
         })
         .json({ status: true, message: 'User Login Successfully' })
@@ -90,7 +90,7 @@ router.get('/logout', async (req, res) => {
         .cookie("token", '', {
             httpOnly: true,
             expires: new Date(0),
-            sameSite: "lax",
+            sameSite: process.env.PROD_ENV === "Development" ? "lax" : "none",
             secure: process.env.PROD_ENV === "Development" ? false : true,
         })
         .json({ status: true, message: 'User Logged out Successfully' })
