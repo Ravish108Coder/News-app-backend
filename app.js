@@ -3,14 +3,16 @@ export const app = express()
 import cookieParser from 'cookie-parser';
 import cors from "cors"
 import authRoutes from './routes/auth.route.js'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 
 // middlewares fixed use
 // app.use(cors()); // use for cross origin resource sharing
 app.use(
     cors({
-    //   origin: [process.env.FRONTEND_URL],
-      origin: 'http://localhost:5173', // allow to server to accept request from different origin
+      origin: process.env.FRONTEND_URI,
       methods: ["GET", "POST", "PUT", "DELETE"],
       credentials: true,
     })
