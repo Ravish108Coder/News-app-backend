@@ -53,11 +53,12 @@ router.post('/login', async (req, res) => {
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "lax",
-            secure: false,
+            secure: process.env.PROD_ENV === "Development" ? false : true,
         })
         .json({ status: true, message: 'User Login Successfully' })
 
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ status: false, message: error.message, error: 'error hai' })
     }
 })
@@ -90,7 +91,7 @@ router.get('/logout', async (req, res) => {
             httpOnly: true,
             expires: new Date(0),
             sameSite: "lax",
-            secure: false,
+            secure: process.env.PROD_ENV === "Development" ? false : true,
         })
         .json({ status: true, message: 'User Logged out Successfully' })
     } catch (error) {
