@@ -21,9 +21,6 @@ export const sendMail = (toEmail, subject, message) => {
         html: message // plain text body
     };
     transporter.sendMail(mailOptions, function (err, info) {
-        if (err)
-            console.log(err)
-        else
-            console.log(info);
+        if (err) return { status: false, msg: err.message };
     });
 }

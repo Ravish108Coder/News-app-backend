@@ -46,7 +46,10 @@ router.post('/sendmail', async (req, res) => {
         if (!email || !subject || !message) {
             return res.status(400).json({ status: false, message: 'All input fields are required' })
         }
-        sendMail(email, subject, message)
+        const {status, msg} = sendMail(email, subject, message)
+        if(!status){
+            throw new Error(msg)
+        }
         return res.status(200).json({ status: true, message: 'Mail sent successfully' })
     } catch (error) {
         return res.status(500).json({ status: false, message: error.message })
