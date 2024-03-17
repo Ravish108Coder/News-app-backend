@@ -14,6 +14,9 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    avatar: {
+        type: String, // cloudinary url
+    },
     createdAt: {
         type: Date,
         default: Date.now,

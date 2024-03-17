@@ -73,7 +73,7 @@ router.get('/verify', async (req, res) => {
         if (!verified) {
             throw new Error('User not verified')
         }
-        const user = await User.findById(verified.id)
+        const user = await User.findById(verified.id).select("-password");
         if (!user) {
             throw new Error('User not found')
         }

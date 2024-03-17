@@ -2,9 +2,39 @@ import { Router } from 'express';
 import { isAuthenticated } from '../middlewares/auth.js';
 import { sendMail } from '../utils/sendMail.js';
 import bcrypt from 'bcryptjs';
+import { upload } from '../middlewares/multer.js';
+import cloudinary from '../utils/cloudinary.js';
 const router = Router()
 
 router.use(isAuthenticated)
+
+router.post('/upload', upload.single('image'), async (req, res) => {
+    try {
+        if (!req.file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+            res.send({ msg: 'Only image files (jpg, jpeg, png) are allowed!' })
+        };
+        const result = await cloudinary.uploader.upload(req.file.path);
+
+        const user = req.user;
+        user.avatar = result.url;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Pic Uploaded Successfully",
+            data: result,
+            user: user
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            success: false,
+            message: "Error in uploading image"
+        });
+    }
+});
+
+
 
 router.get('/profile', async (req, res) => {
     try {
@@ -46,8 +76,8 @@ router.post('/sendmail', async (req, res) => {
         if (!email || !subject || !message) {
             return res.status(400).json({ status: false, message: 'All input fields are required' })
         }
-        const {status, msg} = sendMail(email, subject, message)
-        if(!status){
+        const { status, msg } = sendMail(email, subject, message)
+        if (!status) {
             throw new Error(msg)
         }
         return res.status(200).json({ status: true, message: 'Mail sent successfully' })
