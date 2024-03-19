@@ -47,6 +47,7 @@ router.post('/login', async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
         // console.log(token)
+        user.password = undefined;
         res
         .status(200)
         .cookie("token", token, {
@@ -55,7 +56,7 @@ router.post('/login', async (req, res) => {
             sameSite: process.env.PROD_ENV === "Development" ? "lax" : "none",
             secure: process.env.PROD_ENV === "Development" ? false : true,
         })
-        .json({ status: true, message: 'User Login Successfully' })
+        .json({ status: true, message: 'User Login Successfully', user: user, token: token })
 
     } catch (error) {
         console.log(error)
