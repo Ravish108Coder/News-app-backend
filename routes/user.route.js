@@ -34,7 +34,98 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     }
 });
 
+router.get('/favoriteArticles', async (req, res) => {
+    try {
+        const user = req.user;
+        if (!user) {
+            throw new Error('User not found')
+        }
 
+        return res.status(200).json({ status: true, message: 'All favorite news', articles: user.favoriteNews })
+
+    }catch(error){
+        return res.status(500).json({ status: false, message: error.message })
+    }
+})
+
+router.post('/deleteFromFavorite', async (req, res) => {
+    try {
+        const article = req.body;
+        const user = req.user;
+        const newFavoriteNews = user.favoriteNews.filter((news) => news.uuid !== article.uuid);
+        user.favoriteNews = newFavoriteNews;
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Removed from favoriteNews successfully"
+        })
+    } catch (error) {
+        console.error(err);
+        res.status(500).json({
+            success: false,
+            message: "Error in uploading image"
+        });
+    }
+})
+
+router.post('/isAlreadyFavorite', async (req, res) => {
+    try {
+        const article = req.body;
+        const user = req.user;
+        const isArticleExist = user.favoriteNews.find((news) => news.uuid === article.uuid);
+        if (isArticleExist) {
+            return res.status(200).json({
+                success: true,
+                message: "Article is already in favoriteNews",
+                data: isArticleExist
+            })
+        } else {
+            return res.status(200).json({
+                success: false,
+                message: "Article is not in favoriteNews",
+                data: isArticleExist
+            })
+        }
+    } catch (error) {
+        console.error(err);
+        res.status(500).json({
+            success: false,
+            message: "Error in checking favorite news or not"
+        });
+    }
+})
+
+router.post('/addToFavorite', async (req, res) => {
+    try {
+        const article = req.body;
+        const user = req.user;
+
+        const isArticleExist = user.favoriteNews.find((news) => news.uuid === article.uuid);
+        if (isArticleExist) {
+            return res.status(200).json({
+                success: true,
+                message: "Added to favoriteNews successfully"
+            })
+        }
+
+        user.favoriteNews.push(article);
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Added to favoriteNews successfully"
+        })
+    } catch (error) {
+        console.error(err);
+        res.status(500).json({
+            success: false,
+            message: "Error in uploading image"
+        });
+    }
+})
 
 router.get('/profile', async (req, res) => {
     try {
