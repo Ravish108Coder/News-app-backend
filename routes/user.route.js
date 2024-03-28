@@ -4,6 +4,7 @@ import { sendMail } from '../utils/sendMail.js';
 import bcrypt from 'bcryptjs';
 import { upload } from '../middlewares/multer.js';
 import cloudinary from '../utils/cloudinary.js';
+import { User } from '../models/user.model.js';
 const router = Router()
 
 router.use(isAuthenticated)
@@ -158,6 +159,24 @@ router.put('/profile', async (req, res) => {
         return res.status(200).json({ status: true, message: 'User profile updated', data: user })
     } catch (error) {
         return res.status(500).json({ status: false, message: error.message })
+    }
+})
+
+router.delete('/deleteAccount', async (req, res) => {
+    try {
+        let user = req.user;
+        const {password} = req.body;
+        user = await User.findOne({email: user.email}) 
+        const verified = await bcrypt.compare(password, user.password)
+    
+        if(!verified) return res.json({success: false, message: 'Wrong Password'});
+    
+        await User.deleteOne({email: user.email});
+    
+        return res.json({success: true, message: 'Account Deleted Successfully'})
+    } catch (error) {
+        console.log(error.message)
+        return res.json({success: false, message: error.message})
     }
 })
 
