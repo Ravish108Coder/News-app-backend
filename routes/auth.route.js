@@ -66,20 +66,21 @@ router.post('/login', async (req, res) => {
 
 router.get('/verify', async (req, res) => {
     try {
-        const token = req.cookies.token;
+        const token = req.cookies?.token;
         if (!token) {
-            throw new Error('User not logged in')
+            return res.status(400).json({ status: false, message: 'User not logged in'})
         }
         const verified = jwt.verify(token, process.env.JWT_SECRET)
         if (!verified) {
-            throw new Error('User not verified')
+            return res.status(400).json({ status: false, message: 'Invalid token'})
         }
         const user = await User.findById(verified.id).select("-password");
         if (!user) {
-            throw new Error('User not found')
+            return res.status(400).json({ status: false, message: 'User not found'})
         }
         return res.status(200).json({ status: true, message: 'User verified', token: token, user: user})
     } catch (error) {
+        console.log(error.message)
         return res.status(500).json({ status: false, message: error.message })
     }
 })
