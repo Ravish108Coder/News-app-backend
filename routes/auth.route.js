@@ -74,7 +74,7 @@ router.get('/verify', async (req, res) => {
         if (!verified) {
             return res.status(400).json({ status: false, message: 'Invalid token'})
         }
-        const user = await User.findById(verified.id).select("-password");
+        const user = await User.findById(verified.id).select("-password -favoriteNews");
         if (!user) {
             return res.status(400).json({ status: false, message: 'User not found'})
         }
