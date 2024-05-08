@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import cors from "cors"
 import authRoutes from './routes/auth.route.js'
 import userRoutes from './routes/user.route.js'
+import commentRoutes from './routes/comment.route.js'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -25,6 +26,7 @@ app.use(cookieParser()); // use for parsing cookies
 // middleware routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/comment', commentRoutes);
 
 app.get('/', (req, res) => {
     res.send('Hello World')

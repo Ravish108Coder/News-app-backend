@@ -1,19 +1,23 @@
 import { User } from "../models/user.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendMail } from "../utils/sendMail.js";
+import bcrypt from 'bcryptjs';
+
 
 export const uploadController = async (req, res) => {
     try {
         if (!req.file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
             res.send({ msg: 'Only image files (jpg, jpeg, png) are allowed!' })
         };
+        console.log(req.file.path)
         const result = await cloudinary.uploader.upload(req.file.path);
-
+        console.log(result)
         const user = req.user;
         user.avatar = result.url;
         await user.save();
 
-        res.status(200).json({
+
+        return res.status(200).json({
             success: true,
             message: "Pic Uploaded Successfully",
             data: result,
@@ -21,7 +25,7 @@ export const uploadController = async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Error in uploading image"
         });
@@ -145,7 +149,7 @@ export const updateProfileController = async (req, res) => {
             throw new Error('All input fields are required')
         }
         const hashPassword = await bcrypt.hash(password, 10);
-        user.name = name;
+        user.username = name;
         user.email = email;
         user.password = hashPassword;
         await user.save();
