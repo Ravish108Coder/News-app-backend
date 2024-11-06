@@ -1,10 +1,10 @@
 // Assuming you're using Jest with a commonJS environment
 
-const { deleteFromFavoriteController } = require('../controllers/user.controller.js');
-const { User } = require('../models/user.model.js');
+import { deleteFromFavoriteController } from "../../../controllers/user.controller";
+
 
 // Mocking required modules
-jest.mock('../models/user.model.js', () => ({
+jest.mock('../../../models/user.model.js', () => ({
     User: {
         findById: jest.fn().mockResolvedValue({
             favoriteNews: [
@@ -46,5 +46,5 @@ describe('deleteFromFavoriteController', () => {
         });
     });
 
-    
+
 });

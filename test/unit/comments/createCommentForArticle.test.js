@@ -1,9 +1,9 @@
 import request from 'supertest';
-import { Comment } from '../models/comment.model';
-import { app } from '../app';
 import mongoose from 'mongoose';
+import { Comment } from '../../../models/comment.model';
+import { app } from '../../../app';
 
-jest.mock('../models/comment.model');
+jest.mock('../../../models/comment.model');
 
 describe('POST /api/comment/new', () => {
     it('should create a new comment', async () => {

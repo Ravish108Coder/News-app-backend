@@ -1,4 +1,4 @@
-import { favoriteArticlesController } from '../controllers/user.controller.js';
+import { favoriteArticlesController } from '../../../controllers/user.controller.js';
 
 describe('favoriteArticlesController', () => {
   it('should return favorite articles when user is found', async () => {

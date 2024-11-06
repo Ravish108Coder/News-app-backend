@@ -1,13 +1,13 @@
-import { deleteAccountController } from '../controllers/user.controller.js';
 import bcrypt from 'bcryptjs';
-import { User } from '../models/user.model.js';
+import { deleteAccountController } from '../../../controllers/user.controller.js';
+import { User } from '../../../models/user.model.js';
 
 // Mocking the User model
-jest.mock('../models/user.model.js', () => ({
-    User: {
-        findOne: jest.fn(),
-        deleteOne: jest.fn()
-    }
+jest.mock('../../../models/user.model.js', () => ({
+  User: {
+    findOne: jest.fn(),
+    deleteOne: jest.fn()
+  }
 }));
 
 
@@ -33,7 +33,7 @@ describe('deleteAccountController', () => {
     jest.clearAllMocks();
   });
 
-  
+
 
   it('should return error message if an error occurs', async () => {
     const errorMessage = 'Internal Server Error';

@@ -1,4 +1,4 @@
-import { isAlreadyFavoriteController } from '../controllers/user.controller.js';
+import { isAlreadyFavoriteController } from '../../../controllers/user.controller.js';
 
 describe('isAlreadyFavoriteController', () => {
   it('should return success true when article is already in favoriteNews', async () => {
@@ -25,5 +25,5 @@ describe('isAlreadyFavoriteController', () => {
     expect(res.json).toHaveBeenCalledWith({ success: true, message: 'Article is already in favoriteNews', data: req.user.favoriteNews[0] });
   });
 
-  
+
 });

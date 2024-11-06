@@ -1,8 +1,8 @@
 import request from 'supertest';
-import { Comment } from '../models/comment.model';
-import { app } from '../app';
+import { Comment } from '../../../models/comment.model';
+import { app } from '../../../app';
 
-jest.mock('../models/comment.model');
+jest.mock('../../../models/comment.model');
 
 describe('GET /api/comment/:id', () => {
 

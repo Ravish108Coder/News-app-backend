@@ -1,4 +1,4 @@
-import { addToFavoriteController } from '../controllers/user.controller.js';
+import { addToFavoriteController } from "../../../controllers/user.controller";
 
 describe('addToFavoriteController', () => {
   it('should add article to favoriteNews if not already exist', async () => {
@@ -56,5 +56,5 @@ describe('addToFavoriteController', () => {
     expect(res.json).toHaveBeenCalledWith({ success: true, message: 'Added to favoriteNews successfully' });
   });
 
- 
+
 });
