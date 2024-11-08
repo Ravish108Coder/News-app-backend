@@ -2,20 +2,23 @@ import { User } from "../models/user.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendMail } from "../utils/sendMail.js";
 import bcrypt from 'bcryptjs';
+import xss from 'xss'; // XSS sanitization library
 
+// Helper function to sanitize inputs
+const sanitizeInput = (input) => {
+    return xss(input);  // Use xss package to sanitize inputs
+}
 
 export const uploadController = async (req, res) => {
     try {
         if (!req.file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
-            res.send({ msg: 'Only image files (jpg, jpeg, png) are allowed!' })
+            return res.send({ msg: 'Only image files (jpg, jpeg, png) are allowed!' });
         };
-        console.log(req.file.path)
+
         const result = await cloudinary.uploader.upload(req.file.path);
-        console.log(result)
         const user = req.user;
         user.avatar = result.url;
         await user.save();
-
 
         return res.status(200).json({
             success: true,
@@ -39,10 +42,10 @@ export const favoriteArticlesController = async (req, res) => {
             throw new Error('User not found')
         }
 
-        return res.status(200).json({ status: true, message: 'All favorite news', articles: user.favoriteNews })
+        return res.status(200).json({ status: true, message: 'All favorite news', articles: user.favoriteNews });
 
-    }catch(error){
-        return res.status(500).json({ status: false, message: error.message })
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error.message });
     }
 }
 
@@ -60,10 +63,10 @@ export const deleteFromFavoriteController = async (req, res) => {
             message: "Removed from favoriteNews successfully"
         })
     } catch (error) {
-        console.error(err);
+        console.error(error);
         res.status(500).json({
             success: false,
-            message: "Error in uploading image"
+            message: "Error in removing from favorite news"
         });
     }
 }
@@ -87,7 +90,7 @@ export const isAlreadyFavoriteController = async (req, res) => {
             })
         }
     } catch (error) {
-        console.error(err);
+        console.error(error);
         res.status(500).json({
             success: false,
             message: "Error in checking favorite news or not"
@@ -100,15 +103,22 @@ export const addToFavoriteController = async (req, res) => {
         const article = req.body;
         const user = req.user;
 
-        const isArticleExist = user.favoriteNews.find((news) => news.uuid === article.uuid);
+        // Sanitize the article input to avoid XSS
+        const sanitizedArticle = {
+            uuid: sanitizeInput(article.uuid),
+            title: sanitizeInput(article.title),
+            description: sanitizeInput(article.description)
+        };
+
+        const isArticleExist = user.favoriteNews.find((news) => news.uuid === sanitizedArticle.uuid);
         if (isArticleExist) {
             return res.status(200).json({
                 success: true,
-                message: "Added to favoriteNews successfully"
-            })
+                message: "Already in favoriteNews"
+            });
         }
 
-        user.favoriteNews.push(article);
+        user.favoriteNews.push(sanitizedArticle);
 
         await user.save();
 
@@ -117,24 +127,24 @@ export const addToFavoriteController = async (req, res) => {
             message: "Added to favoriteNews successfully"
         })
     } catch (error) {
-        console.error(err);
+        console.error(error);
         res.status(500).json({
             success: false,
-            message: "Error in uploading image"
+            message: "Error in adding to favorite news"
         });
     }
 }
 
 export const getProfileController = async (req, res) => {
     try {
-        const user = req.user
+        const user = req.user;
         if (!user) {
             throw new Error('User not found')
         }
 
-        return res.status(200).json({ status: true, message: 'User profile', data: user })
+        return res.status(200).json({ status: true, message: 'User profile', data: user });
     } catch (error) {
-        return res.status(500).json({ status: false, message: error.message })
+        return res.status(500).json({ status: false, message: error.message });
     }
 }
 
@@ -144,36 +154,45 @@ export const updateProfileController = async (req, res) => {
         if (!user) {
             throw new Error('User not found')
         }
+        
         const { name, email, password } = req.body;
         if (!name || !email || !password) {
             throw new Error('All input fields are required')
         }
+
+        // Sanitize inputs before saving
+        const sanitizedName = sanitizeInput(name);
+        const sanitizedEmail = sanitizeInput(email);
+
         const hashPassword = await bcrypt.hash(password, 10);
-        user.username = name;
-        user.email = email;
+        user.username = sanitizedName;
+        user.email = sanitizedEmail;
         user.password = hashPassword;
         await user.save();
-        return res.status(200).json({ status: true, message: 'User profile updated', data: user })
+
+        return res.status(200).json({ status: true, message: 'User profile updated', data: user });
     } catch (error) {
-        return res.status(500).json({ status: false, message: error.message })
+        return res.status(500).json({ status: false, message: error.message });
     }
 }
 
 export const deleteAccountController = async (req, res) => {
     try {
         let user = req.user;
-        const {password} = req.body;
-        user = await User.findOne({email: user.email}) 
-        const verified = await bcrypt.compare(password, user.password)
-    
-        if(!verified) return res.json({success: false, message: 'Wrong Password'});
-    
-        await User.deleteOne({email: user.email});
-    
-        return res.json({success: true, message: 'Account Deleted Successfully'})
+        const { password } = req.body;
+
+        // Validate password before deletion
+        user = await User.findOne({ email: user.email });
+
+        const verified = await bcrypt.compare(password, user.password);
+        if (!verified) return res.json({ success: false, message: 'Wrong Password' });
+
+        await User.deleteOne({ email: user.email });
+
+        return res.json({ success: true, message: 'Account Deleted Successfully' });
     } catch (error) {
-        console.log(error.message)
-        return res.json({success: false, message: error.message})
+        console.log(error.message);
+        return res.json({ success: false, message: error.message });
     }
 }
 
@@ -183,10 +202,17 @@ export const sendMailController = async (req, res) => {
         if (!email || !subject || !message) {
             return res.status(400).json({ status: false, message: 'All input fields are required' })
         }
-        const { status, msg } = sendMail(email, subject, message)
+
+        // Sanitize inputs to prevent XSS
+        const sanitizedEmail = sanitizeInput(email);
+        const sanitizedSubject = sanitizeInput(subject);
+        const sanitizedMessage = sanitizeInput(message);
+
+        const { status, msg } = sendMail(sanitizedEmail, sanitizedSubject, sanitizedMessage);
         if (!status) {
-            throw new Error(msg)
+            throw new Error(msg);
         }
+
         return res.status(200).json({ status: true, message: 'Mail sent successfully' })
     } catch (error) {
         return res.status(500).json({ status: false, message: error.message })
