@@ -3,10 +3,11 @@ import jwt from "jsonwebtoken";
 
 export const isAuthenticated = async (req, res, next) => {
     let token = req.headers.authorization;
-    token = token.split(' ')[1]
+    
     if (!token) {
         return res.status(200).json({ status: false, message: 'User not logged in' })
     }
+    token = token.split(' ')[1]
     try {
         const verified = jwt.verify(token, process.env.JWT_SECRET)
         if (!verified) {
