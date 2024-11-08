@@ -9,9 +9,7 @@ export const uploadController = async (req, res) => {
         if (!req.file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
             res.send({ msg: 'Only image files (jpg, jpeg, png) are allowed!' })
         };
-        console.log(req.file.path)
         const result = await cloudinary.uploader.upload(req.file.path);
-        console.log(result)
         const user = req.user;
         user.avatar = result.url;
         await user.save();
@@ -24,7 +22,6 @@ export const uploadController = async (req, res) => {
             user: user
         });
     } catch (err) {
-        console.error(err);
         return res.status(500).json({
             success: false,
             message: "Error in uploading image"
@@ -41,7 +38,7 @@ export const favoriteArticlesController = async (req, res) => {
 
         return res.status(200).json({ status: true, message: 'All favorite news', articles: user.favoriteNews })
 
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({ status: false, message: error.message })
     }
 }
@@ -162,18 +159,17 @@ export const updateProfileController = async (req, res) => {
 export const deleteAccountController = async (req, res) => {
     try {
         let user = req.user;
-        const {password} = req.body;
-        user = await User.findOne({email: user.email}) 
+        const { password } = req.body;
+        user = await User.findOne({ email: user.email })
         const verified = await bcrypt.compare(password, user.password)
-    
-        if(!verified) return res.json({success: false, message: 'Wrong Password'});
-    
-        await User.deleteOne({email: user.email});
-    
-        return res.json({success: true, message: 'Account Deleted Successfully'})
+
+        if (!verified) return res.json({ success: false, message: 'Wrong Password' });
+
+        await User.deleteOne({ email: user.email });
+
+        return res.json({ success: true, message: 'Account Deleted Successfully' })
     } catch (error) {
-        console.log(error.message)
-        return res.json({success: false, message: error.message})
+        return res.json({ success: false, message: error.message })
     }
 }
 
